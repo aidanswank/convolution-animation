@@ -86,3 +86,51 @@ function big_text(str,size,x,y)
   text(str,0,0);
   pop();
 }
+
+// x y pos
+class vec2 {
+    constructor(x,y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+// for colors
+class vec3 {
+    constructor(x,y,z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+}
+
+// not a "slider" like a gui but an object that "slides"
+// around using linear interpolation 
+class lerpSlider
+{
+    constructor(speed) {
+        // this.steps = 0;
+        this.speed = speed;
+        this.target_pos = new vec2(0,0);
+        this.current_pos = new vec2(0,0);
+        this.reachedEnd = false;
+    }
+    reset()
+    {
+        this.tick = 0;
+    }
+    setTarget(x,y)
+    {
+        this.target_pos.x = x;
+        this.target_pos.y = y;
+    }
+    update()
+    {
+        // slide_y_target = val*100;
+
+        // if( this.step < 2000 ){
+        this.current_pos.x = lerp(this.current_pos.x, this.target_pos.x, this.speed);
+        this.current_pos.y = lerp(this.current_pos.y, this.target_pos.y, this.speed);
+        // } this.step += 1;
+    }
+}

@@ -10,6 +10,8 @@ class Grid {
     this.textSize = 24;
     this.data = data;
     this.isHiding = false;
+    this.zero_color = new vec3(25,0,100);
+    this.color = new vec3(100,200,100);
   }
   hide()
   {
@@ -46,9 +48,9 @@ class Grid {
           
           if(cell==0)
           {
-            fill(25, 0, 100 );
+            fill(this.zero_color.x, this.zero_color.y, this.zero_color.z);
           } else {
-            fill(100, 200, 100 );
+            fill(this.color.x, this.color.y, this.color.z);
           }
           // textFont('Helvetica');
           text(str, this.xoff+(j*this.xspace),this.yoff+(i*this.yspace));

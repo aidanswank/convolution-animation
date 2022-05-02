@@ -13,6 +13,9 @@ var newgrid = [];
 var shiftedImpulseGrid;
 var multipliedGrid;
 var resultGrid;
+var plusGrid;
+
+mylerpy = new lerpSlider(0.15);
 
 // set data from forums to arrays
 // parse commas to arrays
@@ -36,6 +39,11 @@ function setDataFromForums()
 
   resultGrid = new Grid([[1,2,3,4,5,6,7]],0,0);
   resultGrid.hide();
+
+  plusGrid = new Grid([["+","+","+","+"],["+","+","+","+"],["+","+","+","+"]],0,0);
+  plusGrid.yspace = multipliedGrid.yspace*2;
+  plusGrid.color = new vec3(0,0,0);
+  plusGrid.hide();
   // console.log(multipliedGrid);
 }
 
@@ -53,6 +61,8 @@ function draw_gridhighlight(index,grid,width,height)
 function sum_rows_callback()
 {
   resultGrid.show();
+  plusGrid.show();
+  mylerpy.setTarget(resultGrid.xoff,32);
 }
 
 function setup() {
@@ -84,7 +94,7 @@ function setup() {
   sum_button.position(slider.width+16, signal_input.height*2);  
   sum_button.hide();
 
-  
+  // mylerpy = new lerpSlider(0.05);
   setDataFromForums();
 
 }
@@ -131,41 +141,56 @@ function draw() {
   draw_gridhighlight(sig_idx,shiftedImpulseGrid,32,shiftedImpulseGrid.getHeight())
 
   newgrid = [];
+  plusgridData = [];
   for(var i = 0; i < sig_idx+1; i++)
   {
     var arr = [];
+    var plusrow = [];
     for(var j = 0; j < outlen; j++)
     {
       var x = shiftedImpulseGrid.data[j][i]*signal[i];
       arr.push(x);
+      plusrow.push("+")
     }
     // console.log(arr);
     newgrid.push(arr);
+    plusgridData.push(plusrow);
   }
+
+  plusgridData.pop();
+  plusGrid.data = plusgridData;
 
   big_text("=", 50, window.innerWidth/2-34, shiftedImpulseGrid.yoff+shiftedImpulseGrid.getHeight()+12);
   
   multipliedGrid.data = newgrid;
   // console.log(shiftedImpulseGrid.data);
   // shiftedImpulseGrid.setPos((window.innerWidth-shiftedImpulseGrid.getWidth())/2,shiftedImpulseGrid.yoff)
-  slide_y_target = val*100;
+  // slide_y_target = val*100;
 
-  if( step < 2000 ){
-    slide_y = lerp(slide_y, slide_y_target, 0.125);
-  } step += 1;
+  // if( step < 2000 ){
+  //   slide_y = lerp(slide_y, slide_y_target, 0.125);
+  // } step += 1;
+
+  // mylerpy.setTarget(val*100,val*200)
+  mylerpy.update();
+  // console.log(mylerpy.current_pos);
 
   // console.log(slide_y);
 
-  multipliedGrid.setPos((window.innerWidth-multipliedGrid.getWidth())/2+slide_y, shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+40);
+  multipliedGrid.setPos((window.innerWidth-multipliedGrid.getWidth())/2, shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+40);
   multipliedGrid.draw();
+  multipliedGrid.yspace = mylerpy.current_pos.y + 32;
 
   strokeWeight(4); // Thicker
-  line((window.innerWidth-300)/2, multipliedGrid.getHeight()+multipliedGrid.yoff-15, (window.innerWidth-300)/2+265,  multipliedGrid.getHeight()+multipliedGrid.yoff-15);
+  line((window.innerWidth-300)/2, multipliedGrid.getHeight()+multipliedGrid.yoff-15-mylerpy.current_pos.y, (window.innerWidth-300)/2+265,  multipliedGrid.getHeight()+multipliedGrid.yoff-15-mylerpy.current_pos.y);
 
-  resultGrid.setPos((window.innerWidth-resultGrid.getWidth())/2, multipliedGrid.getHeight()+multipliedGrid.yoff+20);
+  resultGrid.setPos((window.innerWidth-resultGrid.getWidth())/2, multipliedGrid.getHeight()+multipliedGrid.yoff+20-mylerpy.current_pos.y);
   resultGrid.draw();
 
   resultGrid.data = [ sum_rows(newgrid) ];
+
+  plusGrid.draw();
+  plusGrid.setPos(mylerpy.current_pos.x,multipliedGrid.yoff+mylerpy.current_pos.y)
 
 
 }
