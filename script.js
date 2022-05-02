@@ -2,26 +2,6 @@ var signal = [];
 var impulse = [];
 // console.log(signal.length+impulse.length-1)
 
-function arr_shift(shift)
-{
-  arr = new Array(signal.length).fill(0);
-  // arr[0] = 1;
-  // var shift = shift // reverse shift
-  for(var i = 0; i < impulse.length; i++)
-  {
-    var idx = (impulse.length-1)-i;
-    var shift_index = i-shift;
-    if(shift_index > -1 && shift_index < signal.length)
-    {
-      // console.log(shift_index);
-
-      arr[shift_index] = impulse[idx]
-    }
-    // console.log(idx2);
-  }
-  return arr;
-}
-
 let slider;
 var outlen;
 var signal_input;
@@ -34,22 +14,9 @@ var shiftedImpulseGrid;
 var multipliedGrid;
 var resultGrid;
 
-function create_shifted_impulse_arr()
-{
-  grid = [];
-  outlen = (signal.length+impulse.length)-1;
-  
-  for(var row = 0; row < outlen; row++)
-  {
-    // arr = new Array(signal.length).fill(0);
-    var shift = (impulse.length-1)-row // reverse shift
-    var arr = arr_shift(shift);
-    grid.push(arr);
-  }
-
-  return grid;
-}
-
+// set data from forums to arrays
+// parse commas to arrays
+// create grid objects
 function setDataFromForums()
 {
   sig_str = signal_input.value();
@@ -62,7 +29,7 @@ function setDataFromForums()
   signalGrid = new Grid([signal],0,offsetY); // a grid with 1 row but gonna use same object
 
   // console.log(create_shifted_impulse_arr());
-  var shifted_arr = create_shifted_impulse_arr();
+  var shifted_arr = create_shifted_impulse_arr(signal,impulse);
   shiftedImpulseGrid = new Grid(shifted_arr,0,signalGrid.yoff+20);
 
   multipliedGrid = new Grid([],0,0);
@@ -72,30 +39,17 @@ function setDataFromForums()
   // console.log(multipliedGrid);
 }
 
+// signal index selector controlled by silder
 var sig_idx;
 
+// for the blue highlights over the grids
 function draw_gridhighlight(index,grid,width,height)
 {
   fill(0, 0, 255 , 40);
   rect(grid.xoff-(width/3.5) + (index*grid.xspace), grid.yoff-25, width, height);
 }
 
-function sum_rows(grid)
-{
-  console.log(grid);
-  var results = new Array(outlen).fill(0); // zero out empty array with outsize
-  for(var i = 0; i < grid.length; i++)
-  {
-    for(var j = 0; j < grid[i].length; j++)
-    {
-      // console.log('row',i,grid[i][j]);
-      results[j] += grid[i][j];
-    }
-  }
-  // console.log(results)
-  return results;
-}
-
+// html forum callback for "sum rows" button
 function sum_rows_callback()
 {
   resultGrid.show();
@@ -136,20 +90,12 @@ function setup() {
 }
 
 var step = 0.0;
-var offsetY = 100;
+// for placing middle of screen
+var offsetY = 90;
 var offsetX = 16;
 
-// console.log(window.innerWidth)
-
-function big_text(str,size,x,y)
-{
-  push();
-  textSize(size);
-  translate(x,y);
-  fill(0,0,0);
-  text(str,0,0);
-  pop();
-}
+var slide_y = 0;
+var slide_y_target = 0;
 
 function draw() {
 
@@ -157,8 +103,9 @@ function draw() {
   sig_idx =  Math.round( val*(signal.length-1) );
   // console.log(sig_idx);
 
-  step+=0.01;
+  // step+=0.01;
 
+  // when slider dragged to the very end
   if(sig_idx==(signal.length-1))
   {
     // console.log("MXXXX");
@@ -175,23 +122,13 @@ function draw() {
   strokeWeight(1);
   draw_gridhighlight(sig_idx,signalGrid,32,32);
 
-  // push();
-  // textSize(64);
-  // translate(window.innerWidth/2-32, signalGrid.yoff+signalGrid.getHeight()+35);
-  // fill(0,0,0);
-  // text('*',0,0);
-  // pop();
-
   big_text("*", 64, window.innerWidth/2-32, signalGrid.yoff+signalGrid.getHeight()+35);
 
-  // draw_grid(grid,16,offsetY,32);
   shiftedImpulseGrid.setPos((window.innerWidth-shiftedImpulseGrid.getWidth())/2,signalGrid.yoff+signalGrid.getHeight()+50);
   shiftedImpulseGrid.draw();
-  rotate(0);
+  // rotate(0);
 
   draw_gridhighlight(sig_idx,shiftedImpulseGrid,32,shiftedImpulseGrid.getHeight())
-
-  // draw_recthighlight(shiftedImpulseGrid);
 
   newgrid = [];
   for(var i = 0; i < sig_idx+1; i++)
@@ -211,8 +148,15 @@ function draw() {
   multipliedGrid.data = newgrid;
   // console.log(shiftedImpulseGrid.data);
   // shiftedImpulseGrid.setPos((window.innerWidth-shiftedImpulseGrid.getWidth())/2,shiftedImpulseGrid.yoff)
+  slide_y_target = val*100;
 
-  multipliedGrid.setPos((window.innerWidth-multipliedGrid.getWidth())/2, shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+40);
+  if( step < 2000 ){
+    slide_y = lerp(slide_y, slide_y_target, 0.125);
+  } step += 1;
+
+  // console.log(slide_y);
+
+  multipliedGrid.setPos((window.innerWidth-multipliedGrid.getWidth())/2+slide_y, shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+40);
   multipliedGrid.draw();
 
   strokeWeight(4); // Thicker
@@ -223,34 +167,7 @@ function draw() {
 
   resultGrid.data = [ sum_rows(newgrid) ];
 
-  // draw_grid(newgrid,16,offsetY+300,32);
 
-  // sum_rows(newgrid);
-
-
-  // for(var i = 0; i < newgrid.length; i++)
-  // {
-  //   fill(0, 100, 100 );
-  //   textSize(32);
-  //   text(newgrid[i].toString(), 16, 300+32*(i+1));
-  // }
-
-  // var n = []
-  // // sum rows
-  // for(var j = 0; j < 2; j++)
-  // {
-  //   for(var i = 0; i < outlen; i++)
-  //   {
-  //       // console.log(newgrid[0][i]);
-  //       n.push(newgrid[j][i]);
-  //   }
-  //   console.log(n);
-  // }
-  
-  // textSize(32);
-  // str = "["+signal.join()+"]";
-  // text(str, 8, 80);
-  // fill(0, 102, 153);
 }
 
 function windowResized() {

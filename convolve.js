@@ -1,4 +1,5 @@
 // translated from https://learn.gold.ac.uk/mod/page/view.php?id=1107802
+// Not used in the final version but I used in debug to check if my convolution output was the same
 
 function convolve(signal, impulseResponse)
 {
