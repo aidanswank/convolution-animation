@@ -134,6 +134,9 @@ function sum_rows_callback()
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
+  // var mygrid = new Grid(5,2);
+  // console.log(mygrid);
+
   slider = createSlider(0, 255, 100);
   slider.position(10, 40);
   slider.style('width', '80px');
@@ -265,4 +268,8 @@ function draw() {
   // str = "["+signal.join()+"]";
   // text(str, 8, 80);
   // fill(0, 102, 153);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
