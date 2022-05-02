@@ -5,7 +5,7 @@ class Grid {
     // this.columns = columns;
     this.xoff = xoff;
     this.yoff = yoff;
-    this.xspace = 32;
+    this.xspace = 48;
     this.yspace = 32;
     this.textSize = 24;
     this.data = data;
@@ -13,6 +13,10 @@ class Grid {
   getHeight()
   {
     return this.data.length*(this.yspace);
+  }
+  getWidth()
+  {
+    return this.data[0].length*(this.xspace);
   }
   setPos(x,y)
   {
@@ -35,6 +39,7 @@ class Grid {
         } else {
           fill(100, 200, 100 );
         }
+        // textFont('Helvetica');
         text(str, this.xoff+(j*this.xspace),this.yoff+(i*this.yspace));
       }
     }

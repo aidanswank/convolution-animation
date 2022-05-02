@@ -1,32 +1,3 @@
-function convolve(signal, impulseResponse)
-{
-  outSize = signal.length + impulseResponse.length - 1;
-  var output = new Array(outSize).fill(0); // zero out empty array with outsize
-  for(var n = 0; n < outSize; n++)
-  {
-    // For the inner loop, we need to find the range where the signal and the impulse response overlap.
-    var kmax = n;
-    var kmin = 0;
-		// set kmax so k doesn't go beyond the signal length
-		if (n > signal.length - 1)
-		{
-      kmax = signal.length - 1;
-		}
-		//set kmin so we don't go beyond the end of the impulse response
-		if (n >= impulseResponse.length - 1) {
-      console.log("n is more or equal to (impulseRes len-1)")
-      kmin = n - (impulseResponse.length - 1);
-		}
-		for (var k = kmin; k <= kmax; k++) {
-      output[n] += signal[k] * impulseResponse[n - k];
-      // console.log("n ",n," kmin ",kmin," k",k," out[n]" ,output[n]);
-      console.log("n",n,"k",k,"n-k=",n-k,"impulse[n-k]",impulseResponse[n - k],"signal[k]",signal[k]);
-		}
-  }
-  
-  return output;
-}
-
 var signal = [];
 var impulse = [];
 // console.log(signal.length+impulse.length-1)
@@ -57,7 +28,7 @@ var signal_input;
 var impulse_input;
 var sum_button;
 
-var grid = [];
+// var grid = [];
 var newgrid = [];
 var shiftedImpulseGrid;
 var multipliedGrid;
@@ -87,46 +58,22 @@ function setDataFromForums()
   impulse = imp_str.split(',');
   // console.log(signal_input,impulse_input);
 
+  signalGrid = new Grid([signal],0,offsetY); // a grid with 1 row but gonna use same object
 
   // console.log(create_shifted_impulse_arr());
   var shifted_arr = create_shifted_impulse_arr();
-  shiftedImpulseGrid = new Grid(shifted_arr,16,offsetY);
-  multipliedGrid = new Grid([],16,offsetY+200)
+  shiftedImpulseGrid = new Grid(shifted_arr,0,signalGrid.yoff+20);
+
+  multipliedGrid = new Grid([],0,0);
   // console.log(multipliedGrid);
 }
 
 var sig_idx;
-function draw_recthighlight()
+
+function draw_gridhighlight(index,grid,width,height)
 {
-  // console.log(sig_idx)
-  for(var row = 0; row < signal.length; row++)
-  {
-    // arr = new Array(signal.length).fill(0);
-    // var shift = (impulse.length-1)-row // reverse shift
-    // var arr = arr_shift(shift);
-
-    // grid.push(arr);
-    
-    // fill(0, 102, 153 );
-    // textSize(32);
-    // str = "["+grid[row].join()+"]";
-    // text(str, 8, 32*(row+1));
-
-    fill(0, 100, 100 );
-    textSize(32);
-    str = signal[row].toString();
-    text(str, 400, 32*(row+1));
-
-    
-    // var idx2 =  Math.round( val*(signal.length-1) );
-    // console.log( idx2 );
-    // rec a
-    fill(255, 0, 0 , 20);
-    rect(400, 4+(sig_idx*32), 32, 32);
-    // rec b
-    fill(255, 0, 0 , 20);
-    rect(16 + (sig_idx*32), offsetY-28, 16, 32*outlen);
-  }
+  fill(255, 0, 0 , 20);
+  rect(grid.xoff-(width/3.5) + (index*grid.xspace), grid.yoff-25, width, height);
 }
 
 function sum_rows(grid)
@@ -166,14 +113,15 @@ function setup() {
   sum_button.position(110, 40);  
   sum_button.hide();
   
-  // console.log(convolve(signal,impulse));
   setDataFromForums();
-  // create_grid();
 
 }
 
 var step = 0.0;
 var offsetY = 100;
+var offsetX = 16;
+
+// console.log(window.innerWidth)
 
 function draw() {
 
@@ -191,12 +139,24 @@ function draw() {
     sum_button.hide();
   }
 
-  background(220);
+  background(255);
+
+  signalGrid.setPos((window.innerWidth-signalGrid.getWidth())/2,signalGrid.yoff);
+  signalGrid.draw();
+
+  draw_gridhighlight(sig_idx,signalGrid,32,32);
+
+  textSize(64);
+  fill(0,0,0);
+  text('*', window.innerWidth/2-32, signalGrid.yoff+signalGrid.getHeight()+35);
 
   // draw_grid(grid,16,offsetY,32);
+  shiftedImpulseGrid.setPos((window.innerWidth-shiftedImpulseGrid.getWidth())/2,signalGrid.yoff+signalGrid.getHeight()+50);
   shiftedImpulseGrid.draw();
 
-  draw_recthighlight();
+  draw_gridhighlight(sig_idx,shiftedImpulseGrid,32,shiftedImpulseGrid.getHeight())
+
+  // draw_recthighlight(shiftedImpulseGrid);
 
   newgrid = [];
   for(var i = 0; i < sig_idx+1; i++)
@@ -213,7 +173,9 @@ function draw() {
 
   multipliedGrid.data = newgrid;
   // console.log(shiftedImpulseGrid.data);
-  multipliedGrid.setPos(multipliedGrid.xoff,shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+20);
+  // shiftedImpulseGrid.setPos((window.innerWidth-shiftedImpulseGrid.getWidth())/2,shiftedImpulseGrid.yoff)
+
+  multipliedGrid.setPos((window.innerWidth-multipliedGrid.getWidth())/2,shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+20);
   multipliedGrid.draw();
 
   // draw_grid(newgrid,16,offsetY+300,32);
