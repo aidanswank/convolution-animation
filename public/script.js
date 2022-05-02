@@ -27,8 +27,8 @@ function convolve(signal, impulseResponse)
   return output;
 }
 
-var signal = [1,-3,2,1,0,1];
-var impulse = [3,2,1];
+var signal = [];
+var impulse = [];
 // console.log(signal.length+impulse.length-1)
 
 function arr_shift(shift)
@@ -53,19 +53,18 @@ function arr_shift(shift)
 
 let slider;
 var outlen;
+var signal_input;
+var impulse_input;
+var sum_button;
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
+var grid = [];
+var newgrid = [];
 
-  slider = createSlider(0, 255, 100);
-  slider.position(10, 10);
-  slider.style('width', '80px');
-
-  // console.log(convolve(signal,impulse));
+function create_grid()
+{
   grid = [];
-
   outlen = (signal.length+impulse.length)-1;
-
+  
   for(var row = 0; row < outlen; row++)
   {
     // arr = new Array(signal.length).fill(0);
@@ -73,58 +72,25 @@ function setup() {
     var arr = arr_shift(shift);
     grid.push(arr);
   }
-
-  // console.log(grid)
-  // var x = signal[i];
-  // for(var i = 0; i < outlen; i++)
-  // {
-  //   console.log(grid[i][0],x);
-  //   // for(var j = 0; j < grid.length; j++)
-  //   // {
-  //   //   // for(var k = 0; k < grid[j].length; k++)
-  //   //   // {
-
-  //   //   // }
-  //   // }
-  // }
-
-  // console.log(arr);
-
-
 }
 
-step = 0.0;
+function setDataFromForums()
+{
+  sig_str = signal_input.value();
+  imp_str = impulse_input.value();
+
+  signal = sig_str.split(',');
+  impulse = imp_str.split(',');
+  console.log(signal_input,impulse_input);
 
 
+  create_grid();
+}
 
-function draw() {
-
-  let val = slider.value()/255;
-  var sig_idx =  Math.round( val*(signal.length-1) );
-  console.log(sig_idx);
-
-  step+=0.01;
-
-  background(220);
-
-  for(var i = 0; i < grid.length; i++)
-  {
-    for(var j = 0; j < grid[i].length; j++)
-    {
-      // console.log(grid[i][j])
-      var cell = grid[i][j];
-      if(cell==0)
-      {
-        fill(25, 0, 100 );
-      } else {
-        fill(100, 200, 100 );
-      }
-      textSize(32);
-      str = cell.toString();
-      text(str, 16+j*32,38+i*32);
-    }
-  }
-
+var sig_idx;
+function draw_recthighlight()
+{
+  // console.log(sig_idx)
   for(var row = 0; row < signal.length; row++)
   {
     // arr = new Array(signal.length).fill(0);
@@ -151,8 +117,112 @@ function draw() {
     rect(400, 4+(sig_idx*32), 32, 32);
     // rec b
     fill(255, 0, 0 , 20);
-    rect(16 + (sig_idx*32), 4, 16, 32*outlen);
+    rect(16 + (sig_idx*32), offsetY-28, 16, 32*outlen);
   }
+}
+
+function sum_rows(grid)
+{
+  console.log(grid)
+}
+
+function sum_rows_callback()
+{
+  sum_rows(newgrid)
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  slider = createSlider(0, 255, 100);
+  slider.position(10, 40);
+  slider.style('width', '80px');
+  
+  signal_input = createInput();
+  signal_input.position(10, 10);
+  signal_input.value('1,-3,2,1,0,1');
+  
+  impulse_input = createInput();
+  impulse_input.position(170, 10);
+  impulse_input.value('3,2,1')
+
+  button = createButton('submit');
+  button.position(impulse_input.x + impulse_input.width, 10);
+  button.mousePressed(setDataFromForums);
+
+  sum_button = createButton('SUM ROWS');
+  sum_button.mousePressed(sum_rows_callback);
+  sum_button.position(110, 40);  
+  sum_button.hide();
+  
+  // console.log(convolve(signal,impulse));
+  setDataFromForums();
+  create_grid();
+
+}
+
+var step = 0.0;
+var offsetY = 100;
+
+function draw_grid(grid,offx,offy,spacing)
+{
+  for(var i = 0; i < grid.length; i++)
+  {
+    for(var j = 0; j < grid[i].length; j++)
+    {
+      // console.log(grid[i][j])
+      var cell = grid[i][j];
+      if(cell==0)
+      {
+        fill(25, 0, 100 );
+      } else {
+        fill(100, 200, 100 );
+      }
+      textSize(24);
+      str = cell.toString();
+      text(str, offx+(j*spacing),offy+(i*spacing));
+    }
+  }
+}
+
+function draw() {
+
+  let val = slider.value()/255;
+  sig_idx =  Math.round( val*(signal.length-1) );
+  // console.log(sig_idx);
+
+  step+=0.01;
+
+  if(sig_idx==(signal.length-1))
+  {
+    // console.log("MXXXX");
+    sum_button.show();
+  } else {
+    sum_button.hide();
+  }
+
+  background(220);
+
+  draw_grid(grid,16,offsetY,32);
+  // for(var i = 0; i < grid.length; i++)
+  // {
+  //   for(var j = 0; j < grid[i].length; j++)
+  //   {
+  //     // console.log(grid[i][j])
+  //     var cell = grid[i][j];
+  //     if(cell==0)
+  //     {
+  //       fill(25, 0, 100 );
+  //     } else {
+  //       fill(100, 200, 100 );
+  //     }
+  //     textSize(32);
+  //     str = cell.toString();
+  //     text(str, 16+j*32,offsetY+i*32);
+  //   }
+  // }
+  
+  draw_recthighlight();
 
   newgrid = [];
   for(var i = 0; i < sig_idx+1; i++)
@@ -167,7 +237,18 @@ function draw() {
     newgrid.push(arr);
   }
 
-  console.log(newgrid);
+  draw_grid(newgrid,16,offsetY+300,32);
+
+  // sum_rows(newgrid);
+
+
+  // for(var i = 0; i < newgrid.length; i++)
+  // {
+  //   fill(0, 100, 100 );
+  //   textSize(32);
+  //   text(newgrid[i].toString(), 16, 300+32*(i+1));
+  // }
+
   // var n = []
   // // sum rows
   // for(var j = 0; j < 2; j++)
