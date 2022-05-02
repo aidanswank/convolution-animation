@@ -2,20 +2,6 @@ var signal = [];
 var impulse = [];
 // console.log(signal.length+impulse.length-1)
 
-function rotateCounterClockwise(a){
-  var n=a.length;
-  for (var i=0; i<n/2; i++) {
-      for (var j=i; j<n-i-1; j++) {
-          var tmp=a[i][j];
-          a[i][j]=a[j][n-i-1];
-          a[j][n-i-1]=a[n-i-1][n-j-1];
-          a[n-i-1][n-j-1]=a[n-j-1][i];
-          a[n-j-1][i]=tmp;
-      }
-  }
-  return a;
-}
-
 function arr_shift(shift)
 {
   arr = new Array(signal.length).fill(0);
@@ -90,7 +76,7 @@ var sig_idx;
 
 function draw_gridhighlight(index,grid,width,height)
 {
-  fill(255, 0, 0 , 20);
+  fill(0, 0, 255 , 40);
   rect(grid.xoff-(width/3.5) + (index*grid.xspace), grid.yoff-25, width, height);
 }
 
@@ -113,7 +99,6 @@ function sum_rows(grid)
 function sum_rows_callback()
 {
   resultGrid.show();
-  resultGrid.data = [ sum_rows(newgrid) ];
 }
 
 function setup() {
@@ -124,11 +109,11 @@ function setup() {
   
   signal_input = createInput();
   signal_input.position(10, 10);
-  signal_input.value('1,-3,2,1,0,1');
+  signal_input.value('1,2,3');
   
   impulse_input = createInput();
   impulse_input.position(signal_input.x + signal_input.width, 10);
-  impulse_input.value('3,2,1')
+  impulse_input.value('-1,1')
 
   button = createButton('submit');
   button.position(impulse_input.x + impulse_input.width, 10);
@@ -137,7 +122,8 @@ function setup() {
   
   slider = createSlider(0, 255, 200);
   slider.position(signal_input.x, signal_input.height*2);
-  slider.style('width', '80px');
+  slider.style('width', '100px');
+  slider.value(0);
   
   sum_button = createButton('SUM ROWS');
   sum_button.mousePressed(sum_rows_callback);
@@ -154,6 +140,16 @@ var offsetY = 100;
 var offsetX = 16;
 
 // console.log(window.innerWidth)
+
+function big_text(str,size,x,y)
+{
+  push();
+  textSize(size);
+  translate(x,y);
+  fill(0,0,0);
+  text(str,0,0);
+  pop();
+}
 
 function draw() {
 
@@ -176,15 +172,17 @@ function draw() {
   signalGrid.setPos((window.innerWidth-signalGrid.getWidth())/2,signalGrid.yoff);
   signalGrid.draw();
 
+  strokeWeight(1);
   draw_gridhighlight(sig_idx,signalGrid,32,32);
 
-  push();
-  textSize(64);
-  translate(window.innerWidth/2-32, signalGrid.yoff+signalGrid.getHeight()+35);
-  // rotate(radians(val)*360);
-  fill(0,0,0);
-  text('*',0,0);
-  pop();
+  // push();
+  // textSize(64);
+  // translate(window.innerWidth/2-32, signalGrid.yoff+signalGrid.getHeight()+35);
+  // fill(0,0,0);
+  // text('*',0,0);
+  // pop();
+
+  big_text("*", 64, window.innerWidth/2-32, signalGrid.yoff+signalGrid.getHeight()+35);
 
   // draw_grid(grid,16,offsetY,32);
   shiftedImpulseGrid.setPos((window.innerWidth-shiftedImpulseGrid.getWidth())/2,signalGrid.yoff+signalGrid.getHeight()+50);
@@ -208,15 +206,22 @@ function draw() {
     newgrid.push(arr);
   }
 
+  big_text("=", 50, window.innerWidth/2-34, shiftedImpulseGrid.yoff+shiftedImpulseGrid.getHeight()+12);
+  
   multipliedGrid.data = newgrid;
   // console.log(shiftedImpulseGrid.data);
   // shiftedImpulseGrid.setPos((window.innerWidth-shiftedImpulseGrid.getWidth())/2,shiftedImpulseGrid.yoff)
 
-  multipliedGrid.setPos((window.innerWidth-multipliedGrid.getWidth())/2, shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+20);
+  multipliedGrid.setPos((window.innerWidth-multipliedGrid.getWidth())/2, shiftedImpulseGrid.getHeight()+shiftedImpulseGrid.yoff+40);
   multipliedGrid.draw();
+
+  strokeWeight(4); // Thicker
+  line((window.innerWidth-300)/2, multipliedGrid.getHeight()+multipliedGrid.yoff-15, (window.innerWidth-300)/2+265,  multipliedGrid.getHeight()+multipliedGrid.yoff-15);
 
   resultGrid.setPos((window.innerWidth-resultGrid.getWidth())/2, multipliedGrid.getHeight()+multipliedGrid.yoff+20);
   resultGrid.draw();
+
+  resultGrid.data = [ sum_rows(newgrid) ];
 
   // draw_grid(newgrid,16,offsetY+300,32);
 
