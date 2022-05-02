@@ -9,6 +9,15 @@ class Grid {
     this.yspace = 32;
     this.textSize = 24;
     this.data = data;
+    this.isHiding = false;
+  }
+  hide()
+  {
+    this.isHiding=true;
+  }
+  show()
+  {
+    this.isHiding=false;
   }
   getHeight()
   {
@@ -25,22 +34,25 @@ class Grid {
   }
   draw()
   {
-    for(var i = 0; i < this.data.length; i++)
+    if(!this.isHiding)
     {
-      for(var j = 0; j < this.data[i].length; j++)
+      for(var i = 0; i < this.data.length; i++)
       {
-        textSize(this.textSize);
-        var cell = this.data[i][j];
-        str = cell.toString();
-        
-        if(cell==0)
+        for(var j = 0; j < this.data[i].length; j++)
         {
-          fill(25, 0, 100 );
-        } else {
-          fill(100, 200, 100 );
+          textSize(this.textSize);
+          var cell = this.data[i][j];
+          str = cell.toString();
+          
+          if(cell==0)
+          {
+            fill(25, 0, 100 );
+          } else {
+            fill(100, 200, 100 );
+          }
+          // textFont('Helvetica');
+          text(str, this.xoff+(j*this.xspace),this.yoff+(i*this.yspace));
         }
-        // textFont('Helvetica');
-        text(str, this.xoff+(j*this.xspace),this.yoff+(i*this.yspace));
       }
     }
   }
